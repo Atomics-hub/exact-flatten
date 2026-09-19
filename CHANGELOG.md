@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.1
+
+README corrections, so that every claim is one that holds:
+
+- Both `flat` behaviours are linked to their prior reports: escaping the delimiter requested in 2018
+  (#79), numeric keys becoming arrays reported with the same example in 2020 (#103). Both are open.
+- The description of `flat`'s `{object: true}` says what it does: it keeps numeric keys as objects at
+  the cost of every real array, and does not touch the delimiter problem.
+- Download counts refreshed. No code change.
+
 ## 0.1.0
 
 First release.

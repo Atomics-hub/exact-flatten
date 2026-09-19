@@ -24,7 +24,7 @@ unflatten(flat);   // the object that went in
 Flattening is only useful if it can be undone, and the delimiter is what stops it. If a key can
 itself contain the delimiter, `a.b` means two different things and one of them has to lose.
 
-`flat` (21.7M downloads a week) resolves that by destroying a value:
+`flat` (21M downloads a week) resolves that by destroying a value:
 
 ```js
 unflatten(flatten({'a.b': 1, a: {b: 2}}));   // {a: {b: 2}} — the first value is gone
@@ -32,7 +32,8 @@ unflatten(flatten({'a.b': 1, a: {b: 2}}));   // {a: {b: 2}} — the first value 
 
 There is no delimiter that fixes this — choose `|` and a key containing `|` breaks the same way.
 Keys with dots in them are not exotic: i18n message ids, hostnames, metric names, CSV headers,
-filenames, any `Record<string, T>` keyed by user input.
+filenames, any `Record<string, T>` keyed by user input. This is known: escaping the delimiter has
+been an open request on `flat`'s tracker since 2018 ([#79](https://github.com/hughsk/flat/issues/79)).
 
 The second ambiguity is digits. Once a key is a number, a path cannot say whether it belonged to an
 array or to an object:
@@ -42,9 +43,11 @@ unflatten(flatten({'1': {'2': 'x'}}));   // {'1': [null, null, 'x']} — an obje
 unflatten(flatten({a: {'0': 'zero'}}));  // {a: ['zero']}
 ```
 
-`flat`'s `{object: true}` fixes the second case by breaking the first: then every array comes back
-as an object. No option keeps both. `safe-flat` (287k a week) loses both cases in the same way.
-`flattie` (4.1M a week) only flattens — there is nothing to reverse.
+This was reported with the same example in 2020 ([#103](https://github.com/hughsk/flat/issues/103))
+and is still open. `flat`'s `{object: true}` stops numeric keys turning into arrays, but then every
+real array comes back as an object; no option keeps both, and neither touches the delimiter problem.
+`safe-flat` (288k a week) loses both cases in the same way. `flattie` (4.1M a week) only flattens —
+there is nothing to reverse.
 
 None of this throws. It is silent data loss, in a round trip whose whole purpose is to be lossless.
 
@@ -81,9 +84,9 @@ separately from absent, array holes, and arrays separately from objects with num
 
 | library | weekly downloads | kept | first losses |
 | --- | --- | --- | --- |
-| `flat` | 21.7M | 13/25 | key containing the delimiter, dotted key, i18n ids |
-| `flat` `{object: true}` | 21.7M | 11/25 | same, plus every array returns as an object |
-| `safe-flat` | 287k | 14/25 | key containing the delimiter, dotted key, i18n ids |
+| `flat` | 21M | 13/25 | key containing the delimiter, dotted key, i18n ids |
+| `flat` `{object: true}` | 21M | 11/25 | same, plus every array returns as an object |
+| `safe-flat` | 288k | 14/25 | key containing the delimiter, dotted key, i18n ids |
 | **`exact-flatten`** | — | **25/25** | — |
 
 **Depth** — the deepest structure each one can flatten:
@@ -143,6 +146,8 @@ MIT
 
 ---
 
-Part of a set of measured defects in widely used npm packages — the full list is at
-[tomryan.dev/silent-defects](https://tomryan.dev/silent-defects/), and `npx silent-defects` checks
-your own dependencies against it.
+One of three, with [exact-bytes](https://github.com/Atomics-hub/exact-bytes) and
+[exact-duration](https://github.com/Atomics-hub/exact-duration), each built around a measured
+behaviour of a widely used package. The `flat` behaviours above have been on its own tracker since
+2018 and 2020, so they are not on [tomryan.dev/silent-defects](https://tomryan.dev/silent-defects/),
+which lists only defects nobody had reported; `npx silent-defects` checks a project against that list.
