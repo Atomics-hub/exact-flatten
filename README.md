@@ -2,6 +2,14 @@
 
 Flatten an object to `path -> value` pairs and get exactly the same object back. Zero dependencies.
 
+**Did `flat` lose one of your values?** That is the failure this exists for. When a key contains the
+delimiter — an i18n message id, a hostname, a metric name — flattening and unflattening destroys one
+of the two values, silently.
+
+```js
+unflatten(flatten({'a.b': 1, a: {b: 2}}));   // {a: {b: 2}} — the first value is gone
+```
+
 ```js
 import {flatten, unflatten} from 'exact-flatten';
 
@@ -132,3 +140,9 @@ ESM and CommonJS, TypeScript types included, Node 18 or newer, no dependencies.
 ## License
 
 MIT
+
+---
+
+Part of a set of measured defects in widely used npm packages — the full list is at
+[tomryan.dev/silent-defects](https://tomryan.dev/silent-defects/), and `npx silent-defects` checks
+your own dependencies against it.
